@@ -49,6 +49,32 @@ jobs:
             -DAUDIOCPP_MODELS=maya1
       - name: Compile audio.cpp for physical iPhone
         run: cmake --build /tmp/iona-build --config Release --target engine_runtime --parallel 2
+      - name: Attempt weight-free iPhone C ABI link map
+        run: |
+          mkdir -p /tmp/iona-link-probe
+          sdk="$(xcrun --sdk iphoneos --show-sdk-path)"
+          clang="$(xcrun --sdk iphoneos --find clang)"
+          set +e
+          "$clang" -arch arm64 -isysroot "$sdk" -miphoneos-version-min=17.0 \
+            -I /tmp/audio-cpp/include tests/iona_ios_link_probe.c \
+            /tmp/iona-build/libengine_runtime.a \
+            -Wl,-map,/tmp/iona-link-probe/iona-link.map \
+            -o /tmp/iona-link-probe/iona-link-probe \
+            > /tmp/iona-link-probe/link.stdout 2> /tmp/iona-link-probe/link.stderr
+          status=$?
+          set -e
+          echo "$status" > /tmp/iona-link-probe/link.exitcode
+          echo "Link attempt exit code: $status"
+          if [ "$status" -ne 0 ]; then
+            echo "Link attempt is diagnostic only; unresolved dependencies require follow-up."
+            tail -80 /tmp/iona-link-probe/link.stderr
+          fi
+      - name: Upload iPhone link probe evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iona-iphone-link-probe
+          path: /tmp/iona-link-probe
+          retention-days: 7
       - name: Inventory Maya1 and SNAC objects
         run: |
           echo 'MAYA1 AND SNAC OBJECT FILES (DEVICE TARGET):'

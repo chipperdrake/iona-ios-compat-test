@@ -25,7 +25,7 @@ jobs:
           t=p.read_text()
           helper='''function(set_xcode_property target property value config)\n  if(TARGET ${target})\n    set_property(TARGET ${target} PROPERTY XCODE_ATTRIBUTE_${property} "${value}")\n  endif()\nendfunction()\n'''
           assert 'set_xcode_property(' in t
-          p.write_text(helper+'\\n'+t)
+          p.write_text(helper+chr(10)+t)
           print('Inserted scoped CMake helper into temporary test checkout only')
           PY
       - name: Configure for iOS Simulator without optional OpenMP

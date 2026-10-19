@@ -59,13 +59,13 @@ jobs:
       - name: Capture archive member and symbol evidence
         run: |
           mkdir -p /tmp/iona-link-audit
-          for archive in /tmp/iona-build/**/*.a; do
-            [ -f "$archive" ] || continue
+          find /tmp/iona-build -type f -name '*.a' -print0 | while IFS= read -r -d '' archive; do
             base="$(basename "$archive")"
             ar -t "$archive" > "/tmp/iona-link-audit/${base}.members.txt"
             nm -gU "$archive" > "/tmp/iona-link-audit/${base}.symbols.txt" 2>&1 || true
           done
-          find /tmp/iona-build -name '*.a' -print > /tmp/iona-link-audit/archives.txt
+          find /tmp/iona-build -type f -name '*.a' -print > /tmp/iona-link-audit/archives.txt
+          test "$(find /tmp/iona-link-audit -name '*.members.txt' | wc -l | tr -d ' ')" -eq 8
           printf 'Archive symbols and members are NOT a final application linker map.\n' > /tmp/iona-link-audit/README.txt
       - name: Upload archive linkage evidence
         uses: actions/upload-artifact@v4

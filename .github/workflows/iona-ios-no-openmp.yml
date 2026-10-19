@@ -39,9 +39,11 @@ jobs:
             -DBUILD_SHARED_LIBS=OFF \
             -DENGINE_ENABLE_METAL=OFF \
             -DENGINE_ENABLE_OPENMP=OFF \
-            -DENGINE_ENABLE_NATIVE_CPU=OFF
+            -DENGINE_ENABLE_NATIVE_CPU=OFF \
+            -DAUDIOCPP_MODEL_SET=custom \
+            -DAUDIOCPP_MODELS=maya1
       - name: Compile audio.cpp for iOS Simulator
-        run: cmake --build /tmp/iona-build --config Release --parallel 2
+        run: cmake --build /tmp/iona-build --config Release --target engine_runtime --parallel 2
       - name: Inventory Maya1 and SNAC objects
         run: |
           echo 'MAYA1 AND SNAC OBJECT FILES:'

@@ -69,10 +69,19 @@ jobs:
           sdk="$(xcrun --sdk iphoneos --show-sdk-path)"
           clang="$(xcrun --sdk iphoneos --find clang)"
           set +e
-          "$clang" -arch arm64 -isysroot "$sdk" -miphoneos-version-min=17.0 \
+          cxx="$(xcrun --sdk iphoneos --find clang++)"
+          "$cxx" -arch arm64 -isysroot "$sdk" -miphoneos-version-min=17.0 \
             -I /tmp/audio-cpp/include tests/iona_ios_link_probe.c \
             /tmp/iona-link-probe/audiocpp-capi.o \
             /tmp/iona-build/libengine_runtime.a \
+            /tmp/iona-build/libcjson_vendor.a \
+            /tmp/iona-build/libyaml_vendor.a \
+            /tmp/iona-build/external/sentencepiece/src/libsentencepiece.a \
+            /tmp/iona-build/ggml/src/libggml.a \
+            /tmp/iona-build/ggml/src/ggml-cpu/libggml-cpu.a \
+            /tmp/iona-build/ggml/src/ggml-blas/libggml-blas.a \
+            /tmp/iona-build/ggml/src/libggml-base.a \
+            -framework Accelerate \
             -Wl,-map,/tmp/iona-link-probe/iona-link.map \
             -o /tmp/iona-link-probe/iona-link-probe \
             > /tmp/iona-link-probe/link.stdout 2> /tmp/iona-link-probe/link.stderr

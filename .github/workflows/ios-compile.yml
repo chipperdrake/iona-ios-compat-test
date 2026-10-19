@@ -1,0 +1,27 @@
+name: iOS C++ compilation smoke test
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  ios-compile:
+    runs-on: macos-15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Xcode and SDK
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphonesimulator --show-sdk-path
+      - name: Compile portable C++ for iOS simulator
+        run: |
+          cat > /tmp/iona_smoke.cpp <<'CPP'
+          #include <cstdint>
+          #include <vector>
+          extern "C" int iona_smoke() {
+            std::vector<std::uint32_t> tokens{1, 2, 3};
+            return static_cast<int>(tokens.size());
+          }
+          CPP
+          xcrun --sdk iphonesimulator clang++ -std=c++17 -arch arm64 -target arm64-apple-ios17.0-simulator -c /tmp/iona_smoke.cpp -o /tmp/iona_smoke.o
+          file /tmp/iona_smoke.o

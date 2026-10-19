@@ -30,3 +30,12 @@ The source inventory also lists cpp-httplib, utf8proc, miniaudio and server-fron
 5. Validate actual iPhone 17 Pro memory, latency, heat and quality with a free viable route.
 
 No protected Everett/Iona assets are present. Commercial clearance remains PENDING.
+
+## Pinned upstream license text verification — October 19
+Read complete files at audio.cpp commit `4faef969850e2dd485e717fe2159875b91cfa3dc`:
+- **PASS ggml:** `external/ggml/LICENSE`, MIT, copyright 2023–2026 ggml authors. Preserve copyright and permission notice.
+- **PASS cJSON:** `external/cJSON/LICENSE`, MIT, copyright 2009–2017 Dave Gamble and cJSON contributors. Preserve copyright and permission notice.
+- **PASS libyaml:** `external/libyaml/License`, MIT, copyrights 2017–2020 Ingy döt Net and 2006–2016 Kirill Simonov. Preserve both copyright notices and permission notice.
+- **PASS SentencePiece:** `external/sentencepiece/LICENSE`, Apache-2.0 with additional copyright/license notice at file end. Preserve complete file, inspect separate NOTICE and embedded third-party code obligations.
+- These four license texts permit commercial redistribution subject to their terms. **This does not clear the entire application.** Exact source path evidence: `https://github.com/0xShug0/audio.cpp/tree/4faef969850e2dd485e717fe2159875b91cfa3dc`.
+- **PENDING:** Read SentencePiece embedded third-party licenses, verify included code, assemble full actual notices; pin production source and weight revisions. Existing build archive remains missing these license files.

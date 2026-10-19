@@ -1,0 +1,33 @@
+name: audio.cpp compiled component audit
+on:
+  push:
+    paths:
+      - '.github/workflows/audio-cpp-component-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  component-audit:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Fetch source
+        run: git clone --depth 1 https://github.com/ggml-org/audio.cpp.git /tmp/audio-cpp
+      - name: Identify Maya1 and SNAC references
+        run: |
+          cd /tmp/audio-cpp
+          echo "UPSTREAM COMMIT:"
+          git rev-parse HEAD
+          echo "SOURCE REFERENCES:"
+          grep -RInE 'maya1|Maya1|MAYA1|snac|SNAC' --include='*.cpp' --include='*.h' --include='CMakeLists.txt' . | head -100 || true
+      - name: Configure and compile iOS simulator
+        run: |
+          cmake -S /tmp/audio-cpp -B /tmp/build -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphonesimulator -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=17.0 -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO -DBUILD_SHARED_LIBS=OFF
+          cmake --build /tmp/build --config Release --parallel 2
+      - name: Inventory compiled libraries and object files
+        run: |
+          echo "COMPILED LIBRARIES:"
+          find /tmp/build -type f \( -name '*.a' -o -name '*.dylib' \) -print | head -100
+          echo "MAYA / SNAC OBJECT FILES:"
+          find /tmp/build -type f \( -iname '*maya*' -o -iname '*snac*' \) -print | head -100
+          echo "AUDIT NOTE: A green run does not establish Maya1/SNAC compiled; inspect inventory above."

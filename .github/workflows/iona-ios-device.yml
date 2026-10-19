@@ -58,6 +58,7 @@ jobs:
           "$cxx" -std=c++17 -arch arm64 -isysroot "$sdk" -miphoneos-version-min=17.0 \
             -I /tmp/audio-cpp/include \
             -I /tmp/audio-cpp/src \
+            -I /tmp/audio-cpp/external/ggml/include \
             -I /tmp/iona-build/generated \
             -DAUDIOCPP_VERSION_STRING='"0.2.1"' \
             -c /tmp/audio-cpp/src/capi/audiocpp.cpp \

@@ -1,0 +1,54 @@
+name: Iona Maya1 physical iPhone build
+on:
+  push:
+    paths:
+      - '.github/workflows/iona-ios-device.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ios-maya1:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - name: Fetch public source
+        run: |
+          git clone --depth 1 https://github.com/0xShug0/audio.cpp.git /tmp/audio-cpp
+          cd /tmp/audio-cpp
+          git rev-parse HEAD
+          git submodule update --init --depth 1
+      - name: Work around vendored SentencePiece Xcode helper omission
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/audio-cpp/external/sentencepiece/src/CMakeLists.txt')
+          t=p.read_text()
+          helper='''function(set_xcode_property target property value config)\n  if(TARGET ${target})\n    set_property(TARGET ${target} PROPERTY XCODE_ATTRIBUTE_${property} "${value}")\n  endif()\nendfunction()\n'''
+          assert 'set_xcode_property(' in t
+          p.write_text(helper+chr(10)+t)
+          print('Inserted scoped CMake helper into temporary test checkout only')
+          PY
+      - name: Install Ninja build tool
+        run: brew install ninja
+      - name: Configure for physical iPhone without optional OpenMP
+        run: |
+          cmake -S /tmp/audio-cpp -B /tmp/iona-build -G Ninja \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphoneos \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=17.0 \
+            -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DENGINE_ENABLE_METAL=OFF \
+            -DENGINE_ENABLE_OPENMP=OFF \
+            -DENGINE_ENABLE_NATIVE_CPU=OFF \
+            -DAUDIOCPP_MODEL_SET=custom \
+            -DAUDIOCPP_MODELS=maya1
+      - name: Compile audio.cpp for physical iPhone
+        run: cmake --build /tmp/iona-build --config Release --target engine_runtime --parallel 2
+      - name: Inventory Maya1 and SNAC objects
+        run: |
+          echo 'MAYA1 AND SNAC OBJECT FILES (DEVICE TARGET):'
+          find /tmp/iona-build -type f \( -iname '*maya*' -o -iname '*snac*' \) -print | head -100
+          echo 'BUILD LIBRARIES:'
+          find /tmp/iona-build -type f -name '*.a' -print | head -50

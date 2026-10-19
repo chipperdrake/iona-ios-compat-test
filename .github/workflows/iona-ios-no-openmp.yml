@@ -28,9 +28,11 @@ jobs:
           p.write_text(helper+chr(10)+t)
           print('Inserted scoped CMake helper into temporary test checkout only')
           PY
+      - name: Install Ninja build tool
+        run: brew install ninja
       - name: Configure for iOS Simulator without optional OpenMP
         run: |
-          cmake -S /tmp/audio-cpp -B /tmp/iona-build -G Xcode \
+          cmake -S /tmp/audio-cpp -B /tmp/iona-build -G Ninja \
             -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_OSX_SYSROOT=iphonesimulator \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \

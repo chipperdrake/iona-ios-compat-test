@@ -1,0 +1,36 @@
+name: Iona corrected upstream source check
+on:
+  push:
+    paths:
+      - '.github/workflows/iona-corrected-source-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-check:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - name: Download actual public audio.cpp repository
+        run: |
+          git clone --depth 1 https://github.com/0xShug0/audio.cpp.git /tmp/audio-cpp
+          cd /tmp/audio-cpp
+          git rev-parse HEAD
+          git submodule update --init --depth 1
+      - name: Check Maya1 and SNAC source
+        run: |
+          cd /tmp/audio-cpp
+          echo 'MAYA1/SNAC SOURCE MATCHES:'
+          grep -RInE 'maya1|Maya1|MAYA1|snac|SNAC' --include='*.cpp' --include='*.h' --include='CMakeLists.txt' src include | head -60 || true
+          echo 'CMAKE MODEL CONFIGURATION:'
+          grep -n 'AUDIOCPP_MODEL_SET\|AUDIOCPP_MODELS' CMakeLists.txt | head -20 || true
+      - name: Configure iOS simulator
+        run: |
+          cmake -S /tmp/audio-cpp -B /tmp/iona-build -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphonesimulator -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=17.0 -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO -DBUILD_SHARED_LIBS=OFF -DENGINE_ENABLE_METAL=OFF
+      - name: Compile iOS simulator targets
+        run: cmake --build /tmp/iona-build --config Release --parallel 2
+      - name: Show Maya1 and SNAC object inventory
+        run: |
+          echo 'MATCHING OBJECTS:'
+          find /tmp/iona-build -type f \( -iname '*maya*' -o -iname '*snac*' \) -print | head -80
+          echo 'BUILD COMPLETE (model-specific compilation not proven without matching objects)'

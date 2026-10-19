@@ -13,9 +13,10 @@ jobs:
     steps:
       - name: Fetch public source
         run: |
-          git clone --depth 1 https://github.com/0xShug0/audio.cpp.git /tmp/audio-cpp
+          git clone https://github.com/0xShug0/audio.cpp.git /tmp/audio-cpp
           cd /tmp/audio-cpp
-          git rev-parse HEAD
+          git checkout --detach 4faef969850e2dd485e717fe2159875b91cfa3dc
+          test "$(git rev-parse HEAD)" = "4faef969850e2dd485e717fe2159875b91cfa3dc"
           git submodule update --init --depth 1
       - name: Work around vendored SentencePiece Xcode helper omission
         run: |
@@ -61,7 +62,7 @@ jobs:
           for file in LICENSE LICENSE.md COPYING NOTICE; do
             if [ -f "/tmp/audio-cpp/$file" ]; then cp "/tmp/audio-cpp/$file" /tmp/iona-package/licenses/; fi
           done
-          (cd /tmp/audio-cpp && git rev-parse HEAD) > /tmp/iona-package/UPSTREAM_COMMIT.txt
+          bash scripts/package_iona_licenses.sh /tmp/audio-cpp /tmp/iona-package
           printf 'Unsigned iPhone ARM64 static libraries. Not an installable app; no model weights included. Commercial redistribution and dependencies require separate audit.\n' > /tmp/iona-package/README.txt
           du -sh /tmp/iona-package
       - name: Upload iPhone ARM64 build package

@@ -17,6 +17,17 @@ jobs:
           cd /tmp/audio-cpp
           git rev-parse HEAD
           git submodule update --init --depth 1
+      - name: Work around vendored SentencePiece Xcode helper omission
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/audio-cpp/external/sentencepiece/src/CMakeLists.txt')
+          t=p.read_text()
+          helper='''function(set_xcode_property target property value config)\n  if(TARGET ${target})\n    set_property(TARGET ${target} PROPERTY XCODE_ATTRIBUTE_${property} "${value}")\n  endif()\nendfunction()\n'''
+          assert 'set_xcode_property(' in t
+          p.write_text(helper+'\\n'+t)
+          print('Inserted scoped CMake helper into temporary test checkout only')
+          PY
       - name: Configure for iOS Simulator without optional OpenMP
         run: |
           cmake -S /tmp/audio-cpp -B /tmp/iona-build -G Xcode \
@@ -27,7 +38,8 @@ jobs:
             -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO \
             -DBUILD_SHARED_LIBS=OFF \
             -DENGINE_ENABLE_METAL=OFF \
-            -DENGINE_ENABLE_OPENMP=OFF
+            -DENGINE_ENABLE_OPENMP=OFF \
+            -DENGINE_ENABLE_NATIVE_CPU=OFF
       - name: Compile audio.cpp for iOS Simulator
         run: cmake --build /tmp/iona-build --config Release --parallel 2
       - name: Inventory Maya1 and SNAC objects

@@ -1,0 +1,36 @@
+name: audio.cpp iOS source probe
+on:
+  push:
+    paths:
+      - '.github/workflows/audio-cpp-ios-source.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ios-source-probe:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Show Xcode
+        run: xcodebuild -version
+      - name: Fetch public audio.cpp source only
+        run: |
+          git clone --depth 1 https://github.com/ggml-org/audio.cpp.git /tmp/audio-cpp
+          ls -la /tmp/audio-cpp
+      - name: Inspect build targets without downloading model weights
+        run: |
+          cd /tmp/audio-cpp
+          find . -maxdepth 2 -name CMakeLists.txt -print
+          grep -R -n -m 5 -E 'MAYA|maya|SNAC|snac' CMakeLists.txt src/CMakeLists.txt 2>/dev/null || true
+      - name: Configure for iOS Simulator arm64
+        run: |
+          SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
+          cmake -S /tmp/audio-cpp -B /tmp/audio-cpp-ios-build -G Xcode \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT="$SDK" \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=17.0 \
+            -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO \
+            -DBUILD_SHARED_LIBS=OFF
+      - name: Build source for iOS Simulator
+        run: cmake --build /tmp/audio-cpp-ios-build --config Release --parallel 2

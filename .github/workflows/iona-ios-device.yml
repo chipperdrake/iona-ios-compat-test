@@ -52,3 +52,21 @@ jobs:
           find /tmp/iona-build -type f \( -iname '*maya*' -o -iname '*snac*' \) -print | head -100
           echo 'BUILD LIBRARIES:'
           find /tmp/iona-build -type f -name '*.a' -print | head -50
+
+      - name: Package device libraries, public headers, and source licenses
+        run: |
+          mkdir -p /tmp/iona-package/lib /tmp/iona-package/include /tmp/iona-package/licenses
+          find /tmp/iona-build -type f -name '*.a' -exec cp {} /tmp/iona-package/lib/ \;
+          cp -R /tmp/audio-cpp/include/. /tmp/iona-package/include/
+          for file in LICENSE LICENSE.md COPYING NOTICE; do
+            if [ -f "/tmp/audio-cpp/$file" ]; then cp "/tmp/audio-cpp/$file" /tmp/iona-package/licenses/; fi
+          done
+          (cd /tmp/audio-cpp && git rev-parse HEAD) > /tmp/iona-package/UPSTREAM_COMMIT.txt
+          printf 'Unsigned iPhone ARM64 static libraries. Not an installable app; no model weights included. Commercial redistribution and dependencies require separate audit.\n' > /tmp/iona-package/README.txt
+          du -sh /tmp/iona-package
+      - name: Upload iPhone ARM64 build package
+        uses: actions/upload-artifact@v4
+        with:
+          name: iona-maya1-iphone-arm64-libraries
+          path: /tmp/iona-package
+          retention-days: 7

@@ -47,8 +47,21 @@ jobs:
             -DENGINE_ENABLE_NATIVE_CPU=OFF \
             -DAUDIOCPP_MODEL_SET=custom \
             -DAUDIOCPP_MODELS=maya1
+            -DAUDIOCPP_BUILD_C_API=OFF
       - name: Compile audio.cpp for physical iPhone
         run: cmake --build /tmp/iona-build --config Release --target engine_runtime --parallel 2
+      - name: Compile missing C ABI implementation for link probe
+        run: |
+          mkdir -p /tmp/iona-link-probe
+          sdk="$(xcrun --sdk iphoneos --show-sdk-path)"
+          cxx="$(xcrun --sdk iphoneos --find clang++)"
+          "$cxx" -std=c++17 -arch arm64 -isysroot "$sdk" -miphoneos-version-min=17.0 \
+            -I /tmp/audio-cpp/include \
+            -I /tmp/audio-cpp/src \
+            -I /tmp/iona-build/generated \
+            -DAUDIOCPP_VERSION_STRING='"0.2.1"' \
+            -c /tmp/audio-cpp/src/capi/audiocpp.cpp \
+            -o /tmp/iona-link-probe/audiocpp-capi.o
       - name: Attempt weight-free iPhone C ABI link map
         run: |
           mkdir -p /tmp/iona-link-probe
@@ -57,6 +70,7 @@ jobs:
           set +e
           "$clang" -arch arm64 -isysroot "$sdk" -miphoneos-version-min=17.0 \
             -I /tmp/audio-cpp/include tests/iona_ios_link_probe.c \
+            /tmp/iona-link-probe/audiocpp-capi.o \
             /tmp/iona-build/libengine_runtime.a \
             -Wl,-map,/tmp/iona-link-probe/iona-link.map \
             -o /tmp/iona-link-probe/iona-link-probe \

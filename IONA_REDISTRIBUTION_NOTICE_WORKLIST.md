@@ -39,3 +39,12 @@ Read complete files at audio.cpp commit `4faef969850e2dd485e717fe2159875b91cfa3d
 - **PASS SentencePiece:** `external/sentencepiece/LICENSE`, Apache-2.0 with additional copyright/license notice at file end. Preserve complete file, inspect separate NOTICE and embedded third-party code obligations.
 - These four license texts permit commercial redistribution subject to their terms. **This does not clear the entire application.** Exact source path evidence: `https://github.com/0xShug0/audio.cpp/tree/4faef969850e2dd485e717fe2159875b91cfa3dc`.
 - **PENDING:** Read SentencePiece embedded third-party licenses, verify included code, assemble full actual notices; pin production source and weight revisions. Existing build archive remains missing these license files.
+
+## SentencePiece embedded third-party license verification
+Pinned source: `0xShug0/audio.cpp` commit `4faef969850e2dd485e717fe2159875b91cfa3dc`.
+- **PASS absl:** Complete `external/sentencepiece/third_party/absl/LICENSE` reviewed: Apache-2.0, requires license copy and applicable notices/modified-file markings.
+- **PASS darts_clone:** Complete `external/sentencepiece/third_party/darts_clone/LICENSE` reviewed: copyright 2008–2011 Susumu Yata; BSD-style redistribution terms require source or binary notice/disclaimer preservation.
+- **PASS esaxx:** Complete `external/sentencepiece/third_party/esaxx/LICENSE` reviewed: copyright 2010 Daisuke Okanohara; MIT-style permission and notice retention.
+- **PASS protobuf-lite:** Complete `external/sentencepiece/third_party/protobuf-lite/LICENSE` reviewed: copyright 2008 Google Inc.; BSD-style source/binary notice and disclaimer retention, with generated-code ownership note.
+- These terms permit commercial redistribution subject to notice conditions. Their source presence is verified; exact inclusion of each embedded component in the final iPhone executable remains **PENDING**.
+- Existing unsigned library artifact still lacks these license copies. No protected media, weights, or app files changed. **Commercial release remains NOT CLEARED.**

@@ -34,3 +34,13 @@
 - This repository is an isolated Iona compatibility test.
 - Do not modify Everett, protected voices, or other app repositories.
 - $0 expenditure rule.
+
+
+## Verified weight provenance (2026-10-19)
+- Original model: https://huggingface.co/maya-research/maya1 — repository metadata declares Apache-2.0; original BF16 checkpoint totals approximately 6.6 GB.
+- Official audio.cpp converted package: https://huggingface.co/audio-cpp/audio.cpp-gguf/blob/main/Maya1-GGUF/README.md
+- The converted package explicitly names original Maya1 revision `21c682a0afef8c13a89b2512733c8bf5f0c52eb7` and SNAC revision `d73ad176a12188fcf4f360ba3bf2c2fbbe8f58ec`.
+- The GGUF package states `LICENSE-MAYA1` (Apache-2.0) and `LICENSE-SNAC` (MIT) both apply. The conversion does not remove obligations.
+- Package names: `maya1-orig.gguf` (mixed BF16/FP32), `maya1-q8_0.gguf` (quantized, ~4.04 GB at published upload).
+- Published package SHA256 for q8_0: `559703c4b31fa93f7092c6c8c76723b9584c1ec2644083c9ff17f8ab14d10a58`; original: `52b3d12ec44bd484cad61a3630dfd4645c70e124c7f285f714c484b1a4b7e390` (verify filenames and content before adoption).
+- **Remaining:** Pin converted repository revision; inspect full license files and any additional terms, confirm dependencies and complete notices, verify downloaded GGUF hashes, test actual device memory/latency/heat. These weight files have not been downloaded into the project.

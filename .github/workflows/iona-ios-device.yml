@@ -56,6 +56,23 @@ jobs:
           echo 'BUILD LIBRARIES:'
           find /tmp/iona-build -type f -name '*.a' -print | head -50
 
+      - name: Capture archive member and symbol evidence
+        run: |
+          mkdir -p /tmp/iona-link-audit
+          for archive in /tmp/iona-build/**/*.a; do
+            [ -f "$archive" ] || continue
+            base="$(basename "$archive")"
+            ar -t "$archive" > "/tmp/iona-link-audit/${base}.members.txt"
+            nm -gU "$archive" > "/tmp/iona-link-audit/${base}.symbols.txt" 2>&1 || true
+          done
+          find /tmp/iona-build -name '*.a' -print > /tmp/iona-link-audit/archives.txt
+          printf 'Archive symbols and members are NOT a final application linker map.\n' > /tmp/iona-link-audit/README.txt
+      - name: Upload archive linkage evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iona-static-linkage-evidence
+          path: /tmp/iona-link-audit
+          retention-days: 7
       - name: Package device libraries, public headers, and source licenses
         run: |
           mkdir -p /tmp/iona-package/lib /tmp/iona-package/include /tmp/iona-package/licenses

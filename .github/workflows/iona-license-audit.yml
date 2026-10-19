@@ -1,0 +1,56 @@
+name: Iona commercial dependency inventory
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/iona-license-audit.yml'
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Clone exact upstream and list dependency notices
+        run: |
+          git clone --depth 1 https://github.com/0xShug0/audio.cpp.git upstream
+          cd upstream
+          git submodule update --init --depth 1
+          git rev-parse HEAD > ../UPSTREAM_COMMIT.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('.')
+          out=[]
+          out.append('IONA MAYA1 LICENSING INVENTORY — NOT A LEGAL CLEARANCE')
+          out.append('Exact upstream commit: '+Path('../UPSTREAM_COMMIT.txt').read_text().strip())
+          out.append('Model weight files were NOT downloaded or audited.')
+          out.append('Built libraries include core runtime and vendor libraries, not just Maya1.')
+          out.append('')
+          for directory in ('external','ggml','src','include','assets'):
+              p=root/directory
+              if not p.exists(): continue
+              out.append('## '+directory)
+              for x in sorted(p.rglob('*')):
+                  if x.is_file() and (x.name.lower().startswith(('license','copying','notice','copyright','authors')) or x.name.lower() in ('third-party-licenses.md','third_party_licenses.md')):
+                      if len(x.parts)<=8:
+                          out.append(str(x)+' ('+str(x.stat().st_size)+' bytes)')
+          out.append('')
+          out.append('## Top-level license and notice candidates')
+          for x in sorted(root.iterdir()):
+              if x.is_file() and any(t in x.name.lower() for t in ('license','notice','copying','third')):
+                  out.append(str(x))
+          out.append('')
+          out.append('## Submodule declarations')
+          m=root/'.gitmodules'
+          out.append(m.read_text() if m.exists() else '(none)')
+          Path('../LICENSE_INVENTORY.txt').write_text('\n'.join(out)+'\n')
+          print('\n'.join(out))
+          PY
+      - name: Save licensing inventory for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: iona-commercial-license-inventory
+          path: |
+            LICENSE_INVENTORY.txt
+            UPSTREAM_COMMIT.txt
+          retention-days: 14

@@ -51,3 +51,10 @@ Pinned source: `0xShug0/audio.cpp` commit `4faef969850e2dd485e717fe2159875b91cfa
 
 ## NOTICE discovery check
 At pinned audio.cpp commit `4faef969850e2dd485e717fe2159875b91cfa3dc`, direct path checks returned 404 for `NOTICE`, `external/sentencepiece/NOTICE`, and `external/sentencepiece/third_party/absl/NOTICE`. This means no files at those exact paths, **not** proof that no other notices or attribution requirements exist. `external/ggml/AUTHORS` exists (14,643 characters) and should be preserved as provenance evidence; its necessity for binary redistribution is not established by the MIT license alone. The full 9-file source-license collection is now committed as `IONA_IPHONE_THIRD_PARTY_LICENSE_TEXTS.md` (`989fbd4`). Next check: identify additional license/notice headers embedded in shipped source and link map; integrate actual files into packaging workflow. Commercial clearance still pending.
+
+## Run #4 — verified packaged artifact (2026-10-19)
+- GitHub Actions run `39313556482` completed SUCCESS; artifact `12215833862` (`iona-maya1-iphone-arm64-libraries`) downloaded and ZIP directly inspected.
+- Exactly **8 `.a` libraries**, **9 license files** under `licenses/`, plus `licenses/external/ggml/AUTHORS`.
+- `UPSTREAM_COMMIT.txt` equals pinned `4faef969850e2dd485e717fe2159875b91cfa3dc`.
+- `LICENSE_MANIFEST_SHA256.txt`: **10 entries, 10 hashes independently recomputed and matched, 0 mismatches**.
+- **Packaging notice omission fixed for this test archive.** This is NOT final commercial clearance: audit exact final linked app, model weights, provenance/voice rights, runtime feasibility and any other embedded notices before release.

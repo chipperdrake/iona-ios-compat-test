@@ -31,6 +31,27 @@ for rel in "${paths[@]}"; do
   mkdir -p "$package_root/licenses/$(dirname "$rel")"
   cp "$src" "$package_root/licenses/$rel"
 done
+# Inspect conventional NOTICE paths without inventing missing notices.
+# If any exist, preserve them in the redistribution package.
+declare -a notice_paths=(
+  "NOTICE"
+  "NOTICE.md"
+  "external/ggml/NOTICE"
+  "external/cJSON/NOTICE"
+  "external/libyaml/NOTICE"
+  "external/sentencepiece/NOTICE"
+  "external/sentencepiece/third_party/absl/NOTICE"
+  "external/sentencepiece/third_party/darts_clone/NOTICE"
+  "external/sentencepiece/third_party/esaxx/NOTICE"
+  "external/sentencepiece/third_party/protobuf-lite/NOTICE"
+)
+for rel in "${notice_paths[@]}"; do
+  if [[ -s "$source_root/$rel" ]]; then
+    mkdir -p "$package_root/licenses/$(dirname "$rel")"
+    cp "$source_root/$rel" "$package_root/licenses/$rel"
+    echo "Preserved NOTICE: $rel"
+  fi
+done
 # Provenance record: useful for review, not a substitute for mandatory notices.
 if [[ -s "$source_root/external/ggml/AUTHORS" ]]; then
   cp "$source_root/external/ggml/AUTHORS" "$package_root/licenses/external/ggml/AUTHORS"

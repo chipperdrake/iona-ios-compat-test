@@ -99,6 +99,14 @@ jobs:
           name: iona-iphone-link-probe
           path: /tmp/iona-link-probe
           retention-days: 7
+      - name: Enforce successful link and Maya1 implementation evidence
+        run: |
+          test "$(tr -d '[:space:]' < /tmp/iona-link-probe/link.exitcode)" = "0"
+          test -s /tmp/iona-link-probe/iona-link-probe
+          test -s /tmp/iona-link-probe/iona-link.map
+          grep -q 'Maya1LlamaGenerator' /tmp/iona-link-probe/iona-link.map
+          grep -q 'load_maya1_assets' /tmp/iona-link-probe/iona-link.map
+          echo 'PASS: iPhone link succeeded and Maya1 implementation symbols appear in final map'
       - name: Inventory Maya1 and SNAC objects
         run: |
           echo 'MAYA1 AND SNAC OBJECT FILES (DEVICE TARGET):'

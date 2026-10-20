@@ -69,6 +69,31 @@ if [[ ! -s "$unicode_notice" ]]; then
 fi
 mkdir -p "$package_root/licenses/external/llama_tokenizer"
 cp "$unicode_notice" "$package_root/licenses/external/llama_tokenizer/UNICODE-LICENSE"
+# Download only the two small published weight-license texts from the pinned GGUF release.
+# No model weights are downloaded. Fail closed on network or license-content errors.
+gguf_rev="d63ec81f9a9ccf85d3d906df0d2a89a54c463b00"
+for item in MAYA1 SNAC; do
+  dst="$package_root/licenses/models/LICENSE-$item"
+  mkdir -p "$(dirname "$dst")"
+  curl --fail --location --silent --show-error --retry 3 --max-time 45 \
+    "https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/$gguf_rev/Maya1-GGUF/LICENSE-$item" \
+    -o "$dst"
+  if [[ ! -s "$dst" ]]; then
+    echo "REFUSE: empty model-weight license $item" >&2
+    exit 6
+  fi
+done
+if ! grep -q 'Apache License' "$package_root/licenses/models/LICENSE-MAYA1" || \
+   ! grep -q 'Version 2.0' "$package_root/licenses/models/LICENSE-MAYA1"; then
+  echo "REFUSE: Maya1 license content does not look like Apache-2.0" >&2
+  exit 7
+fi
+if ! grep -q 'MIT License' "$package_root/licenses/models/LICENSE-SNAC" || \
+   ! grep -q 'Permission is hereby granted' "$package_root/licenses/models/LICENSE-SNAC"; then
+  echo "REFUSE: SNAC license content does not look like MIT" >&2
+  exit 8
+fi
+printf '%s\n' "$gguf_rev" > "$package_root/MODEL_LICENSE_SOURCE_REVISION.txt"
 # Provenance record: useful for review, not a substitute for mandatory notices.
 if [[ -s "$source_root/external/ggml/AUTHORS" ]]; then
   cp "$source_root/external/ggml/AUTHORS" "$package_root/licenses/external/ggml/AUTHORS"

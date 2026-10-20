@@ -52,6 +52,15 @@ for rel in "${notice_paths[@]}"; do
     echo "Preserved NOTICE: $rel"
   fi
 done
+# Conservatively preserve the upstream llama.cpp MIT notice for the vendored
+# llama_tokenizer code. Exact historical code provenance remains under audit.
+notice_source="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/notices/llama.cpp-MIT-LICENSE"
+if [[ ! -s "$notice_source" ]]; then
+  echo "REFUSE: missing vendored tokenizer MIT notice" >&2
+  exit 4
+fi
+mkdir -p "$package_root/licenses/external/llama_tokenizer"
+cp "$notice_source" "$package_root/licenses/external/llama_tokenizer/LICENSE"
 # Provenance record: useful for review, not a substitute for mandatory notices.
 if [[ -s "$source_root/external/ggml/AUTHORS" ]]; then
   cp "$source_root/external/ggml/AUTHORS" "$package_root/licenses/external/ggml/AUTHORS"
@@ -61,5 +70,5 @@ printf '%s\n' "$actual" > "$package_root/UPSTREAM_COMMIT.txt"
   cd "$package_root"
   find licenses -type f -print0 | sort -z | xargs -0 shasum -a 256
 ) > "$package_root/LICENSE_MANIFEST_SHA256.txt"
-echo "Prepared 9 license files and optional ggml AUTHORS from pinned source $actual"
+echo "Prepared 9 pinned-source licenses plus llama.cpp MIT notice and optional ggml AUTHORS from pinned source $actual"
 echo "NOTE: No final app link map or model-weight license validation; NOT commercially cleared."
